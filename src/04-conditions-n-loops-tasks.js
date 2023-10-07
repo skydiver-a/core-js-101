@@ -471,6 +471,7 @@ function evaluateTicTacToePosition(position) {
 
   if (winningCombinations.some((i) => i === Xindexes)) return 'X';
   if (winningCombinations.some((i) => i === Oindexes)) return '0';
+  return undefined;
 }
 
 
