@@ -324,16 +324,34 @@ function getDigitalRoot(num) {
  *   '{[(<{[]}>)]}' = true
  */
 function isBracketsBalanced(str) {
-  const brackets = [['(', ')'], ['[', ']'], ['{', '}'], ['<', '>']].map((item) => item.join(''));
-
-  for (let i = 0; i < brackets.length; i += 1) {
-    if (str.includes(brackets[i])) {
-      str.replace(brackets[i], '');
-      i = -1;
+  const stack = [];
+  for (let i = 0; i < str.length; i += 1) {
+    const x = str[i];
+    if (x === '(' || x === '[' || x === '{' || x === '<') {
+      stack.push(x);
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+    if (stack.length === 0) return false;
+    const check = stack.pop();
+    switch (x) {
+      case ')':
+        if (check === '{' || check === '[' || check === '<') return false;
+        break;
+      case '}':
+        if (check === '(' || check === '[' || check === '<') return false;
+        break;
+      case ']':
+        if (check === '(' || check === '{' || check === '<') return false;
+        break;
+      case '>':
+        if (check === '(' || check === '{' || check === '[') return false;
+        break;
+      default:
+        break;
     }
   }
-
-  return str.length === 0;
+  return (stack.length === 0);
 }
 
 
@@ -382,7 +400,7 @@ function getCommonDirectoryPath(pathes) {
   const allElementsEqual = (arr) => arr.every((e) => e === arr[0]);
   const fullArray = rotate(splitStrings(pathes, sep))
     .filter(allElementsEqual).map(elAt(0));
-  return fullArray.length === 1 ? fullArray.join(sep).replace('', '/') : fullArray.join(sep);
+  return fullArray.length >= 1 ? fullArray.join(sep).concat('/') : fullArray.join(sep);
 }
 
 
@@ -458,7 +476,11 @@ function getMatrixProduct(m1, m2) {
  *
  */
 function evaluateTicTacToePosition(position) {
-  const winningCombinations = ['012', '345', '678', '036', '147', '258', '048', '246'];
+  const WC = ['012', '03478', '0468', '345', '678', '036', '147', '1347', '14567', '258', '2458', '23578', '2346', '048', '246'];
+  // eslint-disable-next-line no-shadow
+  const max = position.reduce((max, { length: n }) => (max > n ? max : n), 0);
+  position.forEach((n) => n.push(...Array(max - n.length).fill('')));
+
   const flatted = position.reduce((res, cur) => res.concat(cur));
   const Oindexes = flatted.map((e, i) => (e === '0' ? i : -1))
     .filter((x) => x >= 0).toString()
@@ -468,12 +490,16 @@ function evaluateTicTacToePosition(position) {
     .filter((x) => x >= 0).toString()
     .split(',')
     .join('');
-
-  if (winningCombinations.some((i) => i === Xindexes)) return 'X';
-  if (winningCombinations.some((i) => i === Oindexes)) return '0';
-  return undefined;
+  let result = '';
+  if (WC.some((i) => i === Xindexes)) {
+    result += 'X';
+  } else if (WC.some((i) => i === Oindexes)) {
+    result += '0';
+  } else {
+    result = undefined;
+  }
+  return result;
 }
-
 
 module.exports = {
   getFizzBuzz,
